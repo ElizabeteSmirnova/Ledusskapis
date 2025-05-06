@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import Label, messagebox, simpledialog
 from datetime import datetime, timedelta
 import os
-import fontstyle
+import webbrowser
 
 # Faila nosaukumi
 FRIDGE_FILE = 'fridge.csv'
@@ -82,10 +82,50 @@ def add_to_shopping_list():
     product = simpledialog.askstring("Pievienot iepirkumu sarakstam", "Ievadi produkta nosaukumu:")
     if product:
         df = load_shopping_list()
-        new_row = pd.DataFrame([{'Product': product}])
-        df = pd.concat([df, new_row], ignore_index=True)
-        save_shopping_list(df)
-        messagebox.showinfo("Pievienots", f"{product} pievienots iepirkumu sarakstam!")
+        # Pārbauda, vai produkts jau nav sarakstā
+        if product not in df['Product'].values:
+            new_row = pd.DataFrame([{'Product': product}])
+            df = pd.concat([df, new_row], ignore_index=True)
+            save_shopping_list(df)
+            messagebox.showinfo("Pievienots", f"{product} pievienots iepirkumu sarakstam!")
+        else:
+            messagebox.showinfo("Informācija", f"{product} jau ir pievienots sarakstam.")
+# Atver e-veikalus izvēlēties
+def open_shop_selector():
+    shop_window = tk.Toplevel()
+    shop_window.title("Izvēlies veikalu")
+
+    tk.Label(shop_window, text="Izvēlieties veikalu:", font=("Tahoma", 12), bg="#ffedf2").pack(pady=10)
+
+    # Pogu izvēle veikalu izvēlei
+    button_style = {
+        "width": 25,
+        "font": ("Tahoma", 10),
+        "activebackground": "#ff79a9",
+        "activeforeground": "#a5d4b6",
+        "anchor": "center",
+        "bg": "#ff79a9",
+        "fg": "white",
+        "height": 1,
+        "highlightthickness": 2
+    }
+    
+    tk.Button(shop_window, text="Rimi", command=lambda: open_shop("Rimi"), **button_style).pack(pady=5)
+    tk.Button(shop_window, text="Lidl", command=lambda: open_shop("Lidl"), **button_style).pack(pady=5)
+    tk.Button(shop_window, text="Maxima", command=lambda: open_shop("Maxima"), **button_style).pack(pady=5)
+    tk.Button(shop_window, text="Barbora", command=lambda: open_shop("Barbora"), **button_style).pack(pady=5)
+
+# Atver veikala mājaslapu
+def open_shop(veikals):
+    if veikals == "Rimi":
+        url = "https://www.rimi.lv"
+    elif veikals == "Lidl":
+        url = "https://www.lidl.lv"
+    elif veikals == "Maxima":
+        url = "https://www.maxima.lv"
+    elif veikals == "Barbora":
+        url = "https://www.barbora.lv"
+    webbrowser.open(url)
 
 # GUI izveidošana
 root = tk.Tk()
@@ -93,106 +133,108 @@ root.title("Tavs ledusskapis")
 root.configure(bg='#ffedf2')
 label = Label(root, 
               text="Tavs ledusskapis!",
-                fg='#545454',
-                  font=("Tahoma", 20, "bold"),
-                  bg="#a5d4b6")
+              fg='#545454',
+              font=("Tahoma", 20, "bold"),
+              bg="#a5d4b6")
 label.pack()
 
 root.configure(cursor="heart")
 
+# Pogu pievienošana
 tk.Button(root,
            text="Pievieno produktu!", 
            command=add_product,
-             width=25,
-               font=("Tahoma", 10),
-               activebackground="#ff79a9", ##rozā
-                   activeforeground="#a5d4b6", ## kad uzspiež, burti tādā krāsā
-                   anchor="center",
-                   bg="#ff79a9",
-                   fg="white", #tumši pelēks
-                   height=1,
-                   highlightthickness=2,
-                   
-               ).pack(pady=5)
+           width=25,
+           font=("Tahoma", 10),
+           activebackground="#ff79a9", 
+           activeforeground="#a5d4b6", 
+           anchor="center",
+           bg="#ff79a9",
+           fg="white", 
+           height=1,
+           highlightthickness=2).pack(pady=5)
+
 tk.Button(root, 
           text="Rādīt ledusskapja saturu", 
           command=show_products, 
           width=25,
-            font=("Tahoma", 10),
-            activebackground="#ff79a9", ##rozā
-                   activeforeground="#a5d4b6", ## kad uzspiež, burti tādā krāsā
-                   anchor="center",
-                   bg="#ff79a9",
-                   fg="white", #tumši pelēks
-                   height=1,
-                   highlightthickness=2,
-            ).pack(pady=5)
-
+          font=("Tahoma", 10),
+          activebackground="#ff79a9", 
+          activeforeground="#a5d4b6", 
+          anchor="center",
+          bg="#ff79a9",
+          fg="white", 
+          height=1,
+          highlightthickness=2).pack(pady=5)
 
 tk.Button(root, 
           text="Izņemt produktu", 
           command=remove_product, 
           width=25, 
           font=("Tahoma", 10),
-          activebackground="#ff79a9", ##rozā
-                   activeforeground="#a5d4b6", ## kad uzspiež, burti tādā krāsā
-                   anchor="center",
-                   bg="#ff79a9",
-                   fg="white", #tumši pelēks
-                   height=1,
-                   highlightthickness=2,
-          ).pack(pady=5)
-
+          activebackground="#ff79a9", 
+          activeforeground="#a5d4b6", 
+          anchor="center",
+          bg="#ff79a9",
+          fg="white", 
+          height=1,
+          highlightthickness=2).pack(pady=5)
 
 tk.Button(root, 
           text="Pārbaudīt derīguma termiņus",
-            command=check_expiry,
-              width=25,
-                font=("Tahoma", 10),
-                activebackground="#ff79a9", ##rozā
-                   activeforeground="#a5d4b6", ## kad uzspiež, burti tādā krāsā
-                   anchor="center",
-                   bg="#ff79a9",
-                   fg="white", #tumši pelēks
-                   height=1,
-                   highlightthickness=2,
-                ).pack(pady=5)
-
+          command=check_expiry,
+          width=25,
+          font=("Tahoma", 10),
+          activebackground="#ff79a9", 
+          activeforeground="#a5d4b6", 
+          anchor="center",
+          bg="#ff79a9",
+          fg="white", 
+          height=1,
+          highlightthickness=2).pack(pady=5)
 
 tk.Button(root,
            text="Pievienot iepirkumu sarakstam", 
            command=add_to_shopping_list,
-             width=25,
-               font=("Tahoma", 10),
-               activebackground="#ff79a9", ##rozā
-                   activeforeground="#a5d4b6", ## kad uzspiež, burti tādā krāsā
-                   anchor="center",
-                   bg="#ff79a9",
-                   fg="white", #tumši pelēks
-                   height=1,
-                   highlightthickness=2,
-               ).pack(pady=5)
+           width=25,
+           font=("Tahoma", 10),
+           activebackground="#ff79a9", 
+           activeforeground="#a5d4b6", 
+           anchor="center",
+           bg="#ff79a9",
+           fg="white", 
+           height=1,
+           highlightthickness=2).pack(pady=5)
 
+tk.Button(root, 
+          text="E-veikali", 
+          command=open_shop_selector, 
+          width=25, 
+          font=("Tahoma", 10),
+          activebackground="#ff79a9", 
+          activeforeground="#a5d4b6", 
+          anchor="center",
+          bg="#ff79a9",
+          fg="white", 
+          height=1,
+          highlightthickness=2).pack(pady=5)
 
+# Iziešanas poga
 def button_clicked():
     return button
 
-
-# Creating a button with specified options
 button = tk.Button(root, 
                    text="IZIET", 
                    command=root.destroy,
-                   activebackground="#a5d4b6", ##zaļa
-                   activeforeground="#ff79a9", ## kad uzspiež, burti tādā krāsā
+                   activebackground="#a5d4b6", 
+                   activeforeground="#ff79a9", 
                    anchor="center",
                    bg="#a5d4b6",
-                   fg="#545454", #tumši pelēks
+                   fg="#545454", 
                    font=("Arial", 12, "bold"),
                    height=1,
                    highlightthickness=2,
-                   width=5,
-                    )
-
+                   width=5)
 button.pack(padx=25, pady=20)
 
 root.mainloop()
